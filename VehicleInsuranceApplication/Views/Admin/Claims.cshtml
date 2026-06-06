@@ -1,0 +1,99 @@
+﻿@model IEnumerable<VehicleInsuranceApplication.Models.Claim>
+
+@{
+    ViewData["Title"] = "Claims";
+    Layout = "Admin_layout";
+}
+
+<h2>Claims List</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Policy Number</th>
+            <th>Insured Amount</th>
+            <th>Claimed Amount</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var claim in Model)
+        {
+            <tr>
+                <td>@claim.WebUser.UserName</td>
+                <td>@claim.Policy.PolicyNumber</td>
+                <td>@claim.AmountPaid.ToString("C")</td>
+                <td>@claim.ClaimableAmount.ToString("C")</td>
+                <td>@claim.Reason</td>
+                <td>@claim.ClaimStatus</td>
+                <td>@claim.CreatedAt.ToShortDateString()</td>
+                <td>
+                    <a asp-action="EditClaim" asp-route-id="@claim.Id" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="DeleteClaim" asp-route-id="@claim.Id" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Are you sure you want to delete this claim?');">Delete</a>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+
+
+
+@* @model IEnumerable<VehicleInsuranceApplication.Models.Claim> *@
+
+@* @{ *@
+@*     ViewData["Title"] = "Claims"; *@
+@*     Layout = "Admin_layout"; *@
+@* } *@
+
+@* <div class="container-fluid pt-4 px-4"> *@
+@*     <div class="row vh-100 bg-secondary rounded align-items-center justify-content-center mx-0"> *@
+@*         <div class="col-md-6 text-center"> *@
+@*             <h2>Claims</h2> *@
+
+@*             @if (ViewBag.Message != null) *@
+@*             { *@
+@*                 <div class="alert alert-info">@ViewBag.Message</div> *@
+@*             } *@
+
+@*             <table class="table table-bordered"> *@
+@*                 <thead> *@
+@*                     <tr> *@
+@*                         <th>Policy Number</th> *@
+@*                         <th>Date of Accident</th> *@
+@*                         <th>Place of Accident</th> *@
+@*                         <th>Insured Amount</th> *@
+@*                         <th>Claimable Amount</th> *@
+@*                         <th>User Name</th> <!-- Added new column for User Name --> *@
+@*                         <th>Actions</th> *@
+@*                     </tr> *@
+@*                 </thead> *@
+@*                 <tbody> *@
+@*                     @foreach (var claim in Model) *@
+@*                     { *@
+@*                         <tr> *@
+@*                             <td>@claim.Policy?.PolicyNumber</td> *@
+@*                             <td>@claim.DateOfAccident.ToShortDateString()</td> *@
+@*                             <td>@claim.PlaceOfAccident</td> *@
+@*                             <td>@claim.InsuredAmount</td> *@
+@*                             <td>@claim.ClaimableAmount</td> *@
+@*                             <td>@claim.WebUser?.UserName</td> <!-- Display the user's name --> *@
+@*                             <td> *@
+@*                                 <a asp-action="EditClaim" asp-route-id="@claim.Id" class="btn btn-primary">Edit</a> *@
+@*                                 <a asp-action="DeleteClaim" asp-route-id="@claim.Id" class="btn btn-danger">Delete</a> *@
+@*                             </td> *@
+@*                         </tr> *@
+@*                     } *@
+@*                 </tbody> *@
+@*             </table> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@

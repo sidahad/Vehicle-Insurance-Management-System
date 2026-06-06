@@ -1,0 +1,39 @@
+﻿@model List<Policy>
+
+<h2>Policies</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Policy Number</th>
+            <th>Vehicle Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Amount</th>
+            <th>Image</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var policy in Model)
+        {
+            <tr>
+                <td>@policy.PolicyNumber</td>
+                <td>@policy.VehicleName</td>
+                <td>@policy.StartDate.ToShortDateString()</td>
+                <td>@policy.EndDate.ToShortDateString()</td>
+                <td>@policy.Amount</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(policy.ImagePath))
+                    {
+                        <img src="@policy.ImagePath" alt="Policy Image" width="100">
+                    }
+                    else
+                    {
+                        <span>No Image</span>
+                    }
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>

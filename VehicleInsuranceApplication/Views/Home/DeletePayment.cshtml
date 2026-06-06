@@ -1,0 +1,10 @@
+﻿@model VehicleInsuranceApplication.Models.Payment
+
+<h2>Delete Payment</h2>
+
+<p>Are you sure you want to delete this payment?</p>
+
+<form asp-action="DeletePayment">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+</form>

@@ -1,0 +1,146 @@
+﻿@model VehicleInsuranceApplication.Models.Payment
+@{
+    ViewData["Title"] = "Edit Payment";
+    Layout = "Admin_layout";
+}
+<!-- Blank Start -->
+<div class="container-fluid pt-4 px-4">
+    <div class="row vh-100 bg-secondary rounded align-items-center justify-content-center mx-0">
+        <div class="col-md-6 text-center">
+            <h2>Edit Payment</h2>
+
+            <form asp-controller="Admin" asp-action="EditPayment" method="post">
+                <!-- Hidden Field for Uid -->
+                <div class="form-group">
+                    <input type="hidden" asp-for="Uid" id="Uid" name="Uid" />
+                </div>
+
+                <!-- Select Policy Dropdown -->
+                <div class="form-group">
+                    <label asp-for="PolicyId" for="PolicyId">Select Policy</label>
+                    <select asp-for="PolicyId" class="form-control" id="PolicyId" name="PolicyId">
+                        <option value="">Select Policy</option>
+                        @foreach (var policy in ViewBag.Policies)
+                        {
+                            <option value="@policy.Id">@policy.PolicyNumber</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Amount Paid Input Field -->
+                <div class="form-group">
+                    <label asp-for="AmountPaid" for="AmountPaid">Amount</label>
+                    <input asp-for="AmountPaid" class="form-control" id="AmountPaid" name="AmountPaid" readonly />
+                </div>
+
+                <!-- Payment Method Dropdown -->
+                <div class="form-group">
+                    <label asp-for="PaymentMethod" for="PaymentMethod">Payment Method</label>
+                    <select asp-for="PaymentMethod" class="form-control" id="PaymentMethod" name="PaymentMethod">
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Cash">Cash</option>
+                    </select>
+                </div>
+
+                <!-- Payment Date Input Field -->
+                <div class="form-group">
+                    <label asp-for="PaymentDate" for="PaymentDate">Payment Date</label>
+                    <input asp-for="PaymentDate" class="form-control" id="PaymentDate" name="PaymentDate" readonly />
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const policyDropdown = document.getElementById("PolicyId");
+        const amountField = document.getElementById("AmountPaid");
+
+        // Pre-populate amount if the policy is already selected
+        const selectedPolicyId = policyDropdown.value;
+        if (selectedPolicyId) {
+            fetch(`/Home/GetPolicyAmount?policyId=` + selectedPolicyId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.amount) {
+                        amountField.value = data.amount.toFixed(2);
+                    }
+                });
+        }
+
+        // Re-fetch amount when the policy is changed
+        policyDropdown.addEventListener("change", function () {
+            const policyId = this.value;
+            if (policyId) {
+                fetch(`/Home/GetPolicyAmount?policyId=` + policyId)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.amount) {
+                            amountField.value = data.amount.toFixed(2);
+                        } else {
+                            amountField.value = "";
+                        }
+                    });
+            } else {
+                amountField.value = "";
+            }
+        });
+    });
+</script>
+
+
+
+@* @model VehicleInsuranceApplication.Models.Payment *@
+@* @{ *@
+@*     ViewData["Title"] = "Edit Payment"; *@
+@*     Layout = "Admin_layout"; *@
+@* } *@
+
+@* <div class="container-fluid pt-4 px-4"> *@
+@*     <div class="row vh-100 bg-secondary rounded align-items-center justify-content-center mx-0"> *@
+@*         <div class="col-md-6 text-center"> *@
+@* <h2>Edit Payment</h2> *@
+
+@*  <form asp-controller="Admin" asp-action="EditPayment" method="post"> *@
+@*     <input type="hidden" asp-for="Id" /> *@
+@*     <div class="form-group"> *@
+@*         <label asp-for="PolicyId">Select Policy</label> *@
+@*         <select asp-for="PolicyId" class="form-control"> *@
+@*             <option>Select Policy</option> *@
+@*             @foreach (var policy in ViewBag.Policies) *@
+@*             { *@
+@*                 <option value="@policy.Id">@policy.PolicyNumber</option> *@
+@*             } *@
+@*         </select> *@
+@*     </div> *@
+
+@*     <div class="form-group"> *@
+@*         <label asp-for="AmountPaid">Amount</label> *@
+@*         <input asp-for="AmountPaid" class="form-control" readonly /> *@
+@*     </div> *@
+
+@*     <div class="form-group"> *@
+@*         <label asp-for="PaymentMethod">Payment Method</label> *@
+@*         <select asp-for="PaymentMethod" class="form-control"> *@
+@*             <option value="Credit Card">Credit Card</option> *@
+@*             <option value="Bank Transfer">Bank Transfer</option> *@
+@*             <option value="Cash">Cash</option> *@
+@*         </select> *@
+@*     </div> *@
+
+@*     <div class="form-group"> *@
+@*         <label asp-for="PaymentDate">Payment Date</label> *@
+@*         <input asp-for="PaymentDate" class="form-control" readonly /> *@
+@*     </div> *@
+
+@*     <button type="submit" class="btn btn-primary">Save Changes</button> *@
+@* </form> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+

@@ -1,0 +1,36 @@
+﻿@model IEnumerable<VehicleInsuranceApplication.Models.VehicleCategory>
+
+@{
+    ViewData["Title"] = "Vehicle Categories";
+    Layout = "Admin_layout";
+}
+<div class="container-fluid pt-4 px-4">
+    <div class="row vh-100 bg-secondary rounded align-items-center justify-content-center mx-0">
+        <div class="col-md-6 text-center">
+
+<h2>Vehicle Categories</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Category Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in Model)
+        {
+            <tr>
+                <td>@category.Name</td>
+                <td>
+                                <a asp-action="EditVehicleCategory" asp-route-id="@category.Id" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="DeleteVehicleCategory" asp-route-id="@category.Id" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+        </div>
+    </div>
+</div>

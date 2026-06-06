@@ -1,0 +1,466 @@
+image is saying me this and he is not inseting data in claim i gave you my full code now sort it out
+
+This is my Home Controller
+
+using Microsoft.AspNetCore.Mvc;
+using BCrypt.Net;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
+using VehicleInsuranceApplication.Data;
+using VehicleInsuranceApplication.Models;
+using VehicleInsuranceApplication.Models.ViewModels;
+using ClaimModel = VehicleInsuranceApplication.Models.Claim;
+
+namespace VehicleInsuranceApplication.Controllers
+{
+    public class HomeController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public HomeController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // ==================== CLAIMS ====================
+
+        public IActionResult CreateClaim()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+            {
+                TempData["Error"] = "You must be logged in.";
+                return RedirectToAction("Login");
+            }
+
+            ViewBag.UserId = userId;
+
+            ViewBag.Policies = new SelectList(_context.Policies.ToList(), "Id", "PolicyNumber");
+            return View();
+        }
+
+
+        [HttpPost]
+        public IActionResult CreateClaim(Claim claim)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Debugging info: log all errors
+                foreach (var error in ModelState)
+                {
+                    Console.WriteLine($"Key: {error.Key}");
+                    foreach (var subError in error.Value.Errors)
+                    {
+                        Console.WriteLine($"Error: {subError.ErrorMessage}");
+                    }
+                }
+
+                TempData["Error"] = "Invalid form data. Please check all fields.";
+
+                ViewBag.Policies = new SelectList(_context.Policies.ToList(), "Id", "PolicyNumber");
+                ViewBag.UserId = claim.Uid;
+
+                return View(claim);
+            }
+
+            _context.Claims.Add(claim);
+            _context.SaveChanges();
+
+            TempData["Success"] = "Claim submitted successfully!";
+            return RedirectToAction("CreateClaim");
+        }
+
+
+
+        [HttpGet]
+        public IActionResult GetPolicyAmount(int policyId)
+        {
+            var policy = _context.Policies.FirstOrDefault(p => p.Id == policyId);
+            if (policy == null)
+            {
+                return Json(new { amount = 0 });
+            }
+
+            return Json(new { amount = policy.Amount });
+        }
+
+        public async Task<IActionResult> MyClaims()
+        {
+            int? uid = HttpContext.Session.GetInt32("UserId");
+            if (uid == null) return RedirectToAction("Login");
+
+            var claims = await _context.Claims
+                .Include(c => c.Policy)
+                .Where(c => c.Uid == uid)
+                .ToListAsync();
+
+            if (claims == null || !claims.Any())
+            {
+                // Handle the case where no claims are found
+                ViewBag.Message = "No claims found for this user.";
+            }
+
+            return View(claims);
+        }
+
+        // ==================== POLICIES ====================
+        public async Task<IActionResult> Policies()
+        {
+            var policies = await _context.Policies.ToListAsync();
+            return View(policies);
+        }
+
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear(); // Clears all session data
+            return RedirectToAction("Login");
+        }
+
+        public IActionResult Login()
+        {
+            if (HttpContext.Session.GetString("UserSessions") != null)
+            {
+                return RedirectToAction("Index");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Login([FromForm] WebUser abcd)
+        {
+            if (abcd == null || string.IsNullOrEmpty(abcd.UserName) || string.IsNullOrEmpty(abcd.Password))
+            {
+                ViewBag.Message = "Please enter both username and password.";
+                return View();
+            }
+
+            var mywebuser = _context.WebUsers.FirstOrDefault(y => y.UserName == abcd.UserName);
+
+            if (mywebuser != null && BCrypt.Net.BCrypt.Verify(abcd.Password, mywebuser.Password))
+            {
+                // Set session variables
+                HttpContext.Session.SetString("UserSessions", mywebuser.UserName);
+                HttpContext.Session.SetInt32("UserId", mywebuser.Uid); // Ensure this is correctly set
+
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.Message = "Invalid username or password. Please try again.";
+            return View();
+        }
+
+        public IActionResult Register()
+        {
+            if (HttpContext.Session.GetString("UserSessions") != null)
+            {
+                return RedirectToAction("Login");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Register(WebUser newWebUser)
+        {
+            if (string.IsNullOrWhiteSpace(newWebUser.UserName) || string.IsNullOrWhiteSpace(newWebUser.Password))
+            {
+                ViewBag.Message = "Please fill in all fields!";
+                return View();
+            }
+
+            var existingWebUser = _context.WebUsers.FirstOrDefault(f => f.UserName == newWebUser.UserName);
+            if (existingWebUser != null)
+            {
+                ViewBag.Message = "Username already exists!";
+                return View(); // Stay on the register page
+            }
+
+            // Hash the password before saving (Replace this with actual hashing logic)
+            newWebUser.Password = BCrypt.Net.BCrypt.HashPassword(newWebUser.Password);
+
+            _context.WebUsers.Add(newWebUser);
+            _context.SaveChanges();
+
+            ViewBag.Message = "Registration successful! You can now log in.";
+            return RedirectToAction("Login");
+        }
+
+    }
+}
+
+
+
+
+This is my Admin Controller
+
+using System.Diagnostics;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using VehicleInsuranceApplication.Models;
+using VehicleInsuranceApplication.Models.ViewModels;
+
+namespace VehicleInsuranceApplication.Controllers
+{
+    public class AdminController : Controller
+    {
+
+        private readonly ApplicationDbContext _db;
+
+        public AdminController(ApplicationDbContext db)
+        {
+            this._db = db;
+        }
+
+        public IActionResult Index()
+        {
+            if (HttpContext.Session.GetString("UserSession") != null)
+            {
+                ViewBag.mysession = HttpContext.Session.GetString("UserSession");
+            }
+            else
+            {
+                return RedirectToAction("login");
+            }
+            return View();
+        }
+
+        // ==================== POLICIES ====================
+        public async Task<IActionResult> Policies()
+        {
+            var policies = await _db.Policies.ToListAsync();
+            return View(policies);
+        }
+
+        public IActionResult CreatePolicy()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePolicy(Policy policy, IFormFile ImageUpload)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(policy);
+            }
+
+            if (ImageUpload != null && ImageUpload.Length > 0)
+            {
+
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+
+
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+
+                var uniqueFileName = $"{Guid.NewGuid()}_{ImageUpload.FileName}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImageUpload.CopyToAsync(fileStream);
+                }
+
+                policy.ImagePath = $"/images/{uniqueFileName}";
+            }
+            else
+            {
+                policy.ImagePath = null;
+            }
+
+            _db.Policies.Add(policy);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Policies", "Admin");
+        }
+
+        // ==================== CLAIMS ====================
+        public async Task<IActionResult> Claims()
+        {
+            var claims = await _db.Claims
+                .Include(c => c.Policy)
+                .Include(c => c.WebUser)
+                .ToListAsync();
+
+            // Optional: handle empty claim list
+            if (claims == null || !claims.Any())
+            {
+                ViewBag.Message = "No claims available.";
+            }
+
+            return View(claims);
+        }
+
+    }
+}
+
+
+This is my Claim table
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace VehicleInsuranceApplication.Models
+{
+    public class Claim
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public int? Uid { get; set; }
+        public WebUser WebUser { get; set; }
+
+        [Required]
+        public int PolicyId { get; set; }
+        public Policy Policy { get; set; }
+
+        [Required]
+        [Range(1, double.MaxValue, ErrorMessage = "Insured Amount must be greater than 0.")]
+        public decimal InsuredAmount { get; set; }
+
+        [Required]
+        [Range(1, double.MaxValue, ErrorMessage = "Claimable Amount must be greater than 0.")]
+        public decimal ClaimableAmount { get; set; }
+
+        [Required]
+        public string Reason { get; set; }
+
+        public string ClaimStatus { get; set; } = "Pending";
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+    }
+}
+
+This is my Claims
+
+@model IEnumerable<VehicleInsuranceApplication.Models.Claim>
+
+@{
+    ViewData["Title"] = "Claims";
+    Layout = "Admin_layout";
+}
+
+<h2>Claims List</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Policy</th>
+            <th>Insured Amount</th>
+            <th>Claimable Amount</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var claim in Model)
+        {
+            <tr>
+                <td>@claim.WebUser?.UserName</td>
+                <td>@claim.Policy?.PolicyNumber</td>
+                <td>@claim.InsuredAmount.ToString("C")</td>
+                <td>@claim.ClaimableAmount.ToString("C")</td>
+                <td>@claim.Reason</td>
+                <td>@claim.ClaimStatus</td>
+                <td>@claim.CreatedAt.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+This is my CreateClaim
+
+@model VehicleInsuranceApplication.Models.Claim
+
+@{
+    ViewData["Title"] = "Create Claim";
+}
+
+<h2>Create Claim</h2>
+<!-- ✅ Place the TempData alert block here -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+<form asp-action="CreateClaim" method="post">
+    <input asp-for="Uid" type="hidden" value="@ViewBag.UserId" />
+    <span asp-validation-for="Uid" class="text-danger"></span>
+
+    <label for="PolicyId">Select Policy</label>
+    <select asp-for="PolicyId" asp-items="ViewBag.Policies" class="form-control"></select>
+    <span asp-validation-for="PolicyId" class="text-danger"></span>
+
+    <label for="InsuredAmount">Insured Amount</label>
+    <input asp-for="InsuredAmount" class="form-control" />
+    <span asp-validation-for="InsuredAmount" class="text-danger"></span>
+
+    <label for="ClaimableAmount">Claimable Amount</label>
+    <input asp-for="ClaimableAmount" class="form-control" />
+    <span asp-validation-for="ClaimableAmount" class="text-danger"></span>
+
+    <label for="Reason">Reason</label>
+    <input asp-for="Reason" class="form-control" />
+    <span asp-validation-for="Reason" class="text-danger"></span>
+
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+This is my ApplicationDbContext
+
+using Microsoft.EntityFrameworkCore;
+using VehicleInsuranceApplication.Models;
+
+public class ApplicationDbContext : DbContext
+{
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)
+    {
+    }
+
+    public DbSet<User> Users { get; set; }
+    public DbSet<WebUser> WebUsers { get; set; }
+    public DbSet<Contact> Contacts { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Policy> Policies { get; set; }
+    public DbSet<Claim> Claims { get; set; }
+    public DbSet<Vehicle> Vehicles { get; set; }
+    public DbSet<VehicleCategory> VehicleCategories { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Payment>()
+            .Property(p => p.AmountPaid)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Payment>()
+            .HasOne(pm => pm.Policy)
+            .WithMany(p => p.Payments)
+            .HasForeignKey(pm => pm.PolicyId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+
+}
+

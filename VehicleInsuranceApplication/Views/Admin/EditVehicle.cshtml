@@ -1,0 +1,89 @@
+﻿@model VehicleInsuranceApplication.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Edit Vehicle";
+    Layout = "Admin_layout";
+    var categoriesList = ViewBag.Categories as List<SelectListItem>;
+}
+<!-- Blank Start -->
+<div class="container-fluid pt-4 px-4">
+    <div class="row vh-100 bg-secondary rounded align-items-center justify-content-center mx-0">
+        <div class="col-md-6 text-center">
+
+<h2>Edit Vehicle</h2>
+
+<form asp-controller="Admin" asp-action="EditVehicle" method="post">
+
+    <div class="form-group">
+        <label asp-for="Uid">User ID</label>
+        <input asp-for="Uid" class="form-control" />
+        <span asp-validation-for="Uid" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="OwnerName"></label>
+        <input asp-for="OwnerName" class="form-control" />
+        <span asp-validation-for="OwnerName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Model"></label>
+        <input asp-for="Model" class="form-control" />
+        <span asp-validation-for="Model" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Version"></label>
+        <input asp-for="Version" class="form-control" />
+        <span asp-validation-for="Version" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Rate"></label>
+        <input asp-for="Rate" class="form-control" />
+        <span asp-validation-for="Rate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="BodyNumber"></label>
+        <input asp-for="BodyNumber" class="form-control" />
+        <span asp-validation-for="BodyNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EngineNumber"></label>
+        <input asp-for="EngineNumber" class="form-control" />
+        <span asp-validation-for="EngineNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="VehicleNumber"></label>
+        <input asp-for="VehicleNumber" class="form-control" />
+        <span asp-validation-for="VehicleNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CategoryId">Vehicle Category</label>
+        <select asp-for="CategoryId" class="form-control" required>
+            <option value="">-- Select a Category --</option>
+            @foreach (var category in ViewBag.Categories)
+            {
+                <option value="@category.Value" selected="@(Model.CategoryId == int.Parse(category.Value) ? "selected" : null)">@category.Text</option>
+            }
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a asp-action="Vehicles" class="btn btn-secondary">Cancel</a>
+</form>
+        </div>
+    </div>
+</div>

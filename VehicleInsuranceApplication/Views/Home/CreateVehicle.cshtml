@@ -1,0 +1,55 @@
+﻿@model VehicleInsuranceApplication.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Create Vehicle";
+}
+
+<h2>Create Vehicle</h2>
+
+<form asp-action="CreateVehicle" method="post">
+    <div class="form-group">
+        <label>
+            <input type="hidden">
+        </label>
+
+    </div>
+    <div class="form-group">
+        <label>Category</label>
+        <select asp-for="CategoryId" class="form-control" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))">
+            <option value="">Select Category</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label asp-for="Name">Vehicle Name</label>
+        <input asp-for="Name" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="OwnerName">Owner Name</label>
+        <input asp-for="OwnerName" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="Model">Model</label>
+        <input asp-for="Model" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="Version">Version</label>
+        <input asp-for="Version" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="Rate">Rate</label>
+        <input asp-for="Rate" type="number" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="BodyNumber">Body Number</label>
+        <input asp-for="BodyNumber" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="EngineNumber">Engine Number</label>
+        <input asp-for="EngineNumber" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="VehicleNumber">Vehicle Number</label>
+        <input asp-for="VehicleNumber" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-success">Submit</button>
+</form>

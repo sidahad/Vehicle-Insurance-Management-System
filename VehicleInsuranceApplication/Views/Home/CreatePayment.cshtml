@@ -1,0 +1,72 @@
+﻿@model VehicleInsuranceApplication.Models.ViewModels.CreatePaymentViewModel
+
+<form asp-action="CreatePayment" method="post">
+    <div class="form-group">
+        <input type="hidden" asp-for="Uid" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PolicyId">Select Policy</label>
+        <select asp-for="PolicyId" class="form-control">
+            <option>Select Policy</option>
+            @foreach (var policy in Model.Policies)
+            {
+                <option value="@policy.Id">@policy.PolicyNumber</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Amount">Amount</label>
+        <input asp-for="Amount" class="form-control" id="Amount" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PaymentMethod">Payment Method</label>
+        <select asp-for="PaymentMethod" class="form-control">
+            <option value="Credit Card">Credit Card</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cash">Cash</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PaymentDate">Payment Date</label>
+        <input asp-for="PaymentDate" class="form-control" readonly />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const policyDropdown = document.getElementById("PolicyId");
+        const amountField = document.getElementById("Amount");
+
+        policyDropdown.addEventListener("change", function () {
+            const policyId = this.value;
+            if (policyId) {
+                fetch(`/Home/GetPolicyAmount?policyId=` + policyId)
+                    .then(response => {
+                        console.log("Fetching amount...");
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Amount received:", data);
+                        if (data && data.amount) {
+                            amountField.value = data.amount.toFixed(2);
+                        } else {
+                            console.error("No amount returned.");
+                            amountField.value = "";
+                        }
+                    })
+                    .catch(error => console.error("Error fetching amount:", error));
+            } else {
+                amountField.value = "";
+            }
+        });
+    });
+</script>
+
+

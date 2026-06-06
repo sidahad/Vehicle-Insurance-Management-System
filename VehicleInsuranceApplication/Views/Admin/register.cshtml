@@ -1,0 +1,37 @@
+﻿@model User
+
+@{
+    ViewData["Title"] = "Admin Register Page";
+    Layout = "Admin_layout";
+}
+
+<h1>Register</h1>
+
+<h4>Create an Account</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="register">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" type="password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <a style="color: black; text-decoration-color: black; text-decoration: black;" asp-action="login">Already have an account? Login</a>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Register" class="btn btn-primary" />
+            </div>
+        </form>
+        <p class="text-success">@ViewBag.Message</p>
+    </div>
+</div>
+
+
